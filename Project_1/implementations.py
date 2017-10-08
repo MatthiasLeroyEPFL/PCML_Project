@@ -5,7 +5,7 @@ def compute_loss(y, tx, w):
     #loss = 1/(2*tx.shape[0]) * np.dot(np.transpose(e),e)
     
     #loss1 = 1/tx.shape[0] * np.sum(np.absolute(e)) 
-    return loss
+    return e
 
 def compute_mse(y, tx, w):
     e = compute_loss(y, tx, w)
@@ -20,7 +20,7 @@ def compute_gradient(y, tx, w):
     gradient = -1/tx.shape[0] * np.dot(np.transpose(tx),e)
     return gradient
 
-def least_squares_GD(y, tx, initial_w, maw_iters, gamma):
+def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     w = initial_w
     for n_iter in range(max_iters):
         gradient = compute_gradient(y, tx, w)
@@ -30,7 +30,7 @@ def least_squares_GD(y, tx, initial_w, maw_iters, gamma):
     return w, loss
 
 
-def least_squares_SGD(y, tx, initial_w, maw_iters, gamma):
+def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     
     batch_size = 1
     w = initial_w

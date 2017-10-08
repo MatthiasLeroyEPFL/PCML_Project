@@ -14,9 +14,17 @@ def standardize(x):
     x = x / std_x
     return x, mean_x, std_x
 
-def build_poly(x, degree):
-    pol = np.array([x**d for d in range(degree+1)]).transpose()
-    return pol
+def build_poly(x, start, end):
+    matrix_poly = np.array([]).reshape(x.shape[0],0)
+    for col in x.transpose():
+        
+        pol = np.array([col**d for d in range(start, end)]).transpose()
+       
+        matrix_poly = np.concatenate((matrix_poly,pol),1)
+        
+    return matrix_poly
+    
+           
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     """
