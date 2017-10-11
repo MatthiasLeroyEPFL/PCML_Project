@@ -15,6 +15,9 @@ def compute_mae(y, tx, w):
     e = compute_loss(y, tx, w)
     return 1/tx.shape[0] * np.sum(np.absolute(e))
 
+def compute_rmse(y, tx, w):
+    return np.sqrt(2 * compute_mse(y, tx, w))
+
 def compute_gradient(y, tx, w):
     e = y - np.dot(tx,w)
     gradient = -1/tx.shape[0] * np.dot(np.transpose(tx),e)

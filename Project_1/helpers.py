@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from implementations import *
+from proj1_helpers import *
+import matplotlib.pyplot as plt
 
 def removeColumns(dataset):
     colToRemove = []
