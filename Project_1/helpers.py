@@ -30,7 +30,7 @@ def standardize(x):
     """Standardize the original data set."""
     mean_x = np.mean(x)
     x = x - mean_x
-    std_x = np.std(x)
+    std_x = np.std(x,0)
     x = x / std_x
     return x, mean_x, std_x
 
@@ -42,7 +42,8 @@ def build_poly(x, start, end):
        
         matrix_poly = np.concatenate((matrix_poly,pol),1)
         
-    return np.concatenate((x, matrix_poly), 1)
+    #return np.concatenate((x, matrix_poly), 1)
+    return matrix_poly
     
 def split_data(x, y, ratio, seed=1):
    
@@ -75,6 +76,35 @@ def combinations(dataset):
             matrix = np.concatenate((matrix,new_col), 1)
     return matrix
 
+def compute_momentum(tra_momentum, pseudo_rap, azi_angle):
+    x = tra_momentum * np.cos(azi_angle)
+    y = tra_momentum * np.sin(azi_angle)
+    z = tra_momentum * np.sinh(pseudo_rap)
+    return x, y, z
+
+def compute_invariant_mass(dataset, columns_indexA, columns_indexB):
+    a_x, a_y, a_z = compute_momentum(dataset[:, columns_indexA[0]], dataset[:, columns_indexA[1]], dataset[:, columns_indexA[2]])
+    b_x, b_y, b_z = compute_momentum(dataset[:, columns_indexB[0]], dataset[:, columns_indexB[1]], dataset[:, columns_indexB[2]])
+    
+    a = np.sqrt(np.square(a_x) + np.square(a_y) + np.square(a_z))
+    b = np.sqrt(np.square(b_x) + np.square(b_y) + np.square(b_z))
+    
+    invariant_mass = np.sqrt(np.square(a + b) - np.square(a_x + b_x) - np.square(a_y + b_y) - np.square(a_z + b_z))
+    return invariant_mass
+
+
+def compute_transverse_mass(dataset, columns_indexA, columns_indexB):
+    a_x, a_y, a_z = compute_momentum(dataset[:, columns_indexA[0]], dataset[:, columns_indexA[1]], dataset[:, columns_indexA[2]])
+    b_x, b_y, b_z = compute_momentum(dataset[:, columns_indexB[0]], dataset[:, columns_indexB[1]], dataset[:, columns_indexB[2]])
+    
+    a = np.sqrt(np.square(a_x) + np.square(a_y))
+    b = np.sqrt(np.square(b_x) + np.square(b_y))
+    
+    transverse_mass = np.sqrt(np.square(a + b) - np.square(a_x + b_x) - np.square(a_y + b_y))
+    return transverse_mass
+
+def compute_pseudo_rapidity(dataset, indexA, indexB):
+    return np.abs(dataset[:,indexA] - dataset[:,indexB])
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     """
