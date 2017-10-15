@@ -4,6 +4,7 @@ import numpy as np
 from implementations import *
 from proj1_helpers import *
 import matplotlib.pyplot as plt
+from collections import Counter
 
 def removeColumns(dataset):
     colToRemove = []
@@ -12,7 +13,24 @@ def removeColumns(dataset):
             colToRemove.append(i)
     return colToRemove
 
-            
+def clean_column(col):
+    
+    count = Counter(col)
+    count.pop(-999)
+    most_value = count.most_common(1)[0][0]
+    col[col == -999] = np.nan
+    mean = np.nanmean(col)
+    index_train = np.where(np.isnan(col))
+    col[index_train] = most_value
+    #print(np.std(col))
+    return col
+    
+def normalize(dataset):
+    maximum = dataset.max(0)
+    minimum = dataset.min(0)
+    normalize_set = (dataset - minimum) / (maximum - minimum)
+    return normalize_set
+    
 def cleanDataSet(dataTrain, dataTest):
     dataTrain[dataTrain == -999] = np.nan
     means = np.nanmean(dataTrain, axis = 0)
@@ -26,25 +44,32 @@ def cleanDataSet(dataTrain, dataTest):
     dataTest = (dataTest - mean) / std
     return dataTrain, dataTest
 
-def standardize(x):
+def standardize(x, mean_std=True):
     """Standardize the original data set."""
-    mean_x = np.mean(x)
-    x = x - mean_x
     std_x = np.std(x,0)
+    mean_x = np.mean(x,0)
+    x = x - mean_x
+    
     x = x / std_x
-    return x, mean_x, std_x
+    if mean_std:
+        return x, mean_x, std_x
+    return x
 
-def build_poly(x, start, end):
+def build_poly(x, end, combination):
     matrix_poly = np.array([]).reshape(x.shape[0],0)
     for col in x.transpose():
         
-        pol = np.array([col**d for d in range(start, end)]).transpose()
+        pol = np.array([col**d for d in range(1, end+1)]).transpose()
        
         matrix_poly = np.concatenate((matrix_poly,pol),1)
         
-    #return np.concatenate((x, matrix_poly), 1)
+    if combination:
+        return np.concatenate((matrix_poly, combinations(x)), 1)
     return matrix_poly
-    
+
+def add_ones(dataset):
+    return np.concatenate((np.ones(dataset.shape[0]).reshape(-1,1), dataset), 1)
+
 def split_data(x, y, ratio, seed=1):
    
     # set seed
@@ -67,7 +92,7 @@ def combinations(dataset):
     number_col = dataset.shape[1]
     matrix = np.array([]).reshape(dataset.shape[0],0)
     for i in range(number_col):
-        for j in range(i,number_col):
+        for j in range(i+1,number_col):
             col_i = dataset[:,i]
             col_j = dataset[:,j]
         
@@ -105,6 +130,17 @@ def compute_transverse_mass(dataset, columns_indexA, columns_indexB):
 
 def compute_pseudo_rapidity(dataset, indexA, indexB):
     return np.abs(dataset[:,indexA] - dataset[:,indexB])
+
+def compute_product_pseudo(dataset, indexA, indexB):
+    return dataset[:,indexA] * dataset[:,indexB]
+
+def compute_r_separation(dataset, col_indexA, col_indexB):
+    diff_pseudo = np.square(dataset[:,col_indexA[0]] - dataset[:,col_indexB[0]])
+    diff_azi = dataset[:,col_indexA[1]] - dataset[:,col_indexB[1]]
+    diff_azi[diff_azi > np.pi] = diff_azi[diff_azi > np.pi] - 2*np.pi
+    diff_azi[diff_azi < -np.pi] = diff_azi[diff_azi < -np.pi] + 2*np.pi            
+    print(diff_azi[(diff_azi>np.pi) | (diff_azi<-np.pi)])
+    return np.sqrt(diff_pseudo + np.square(diff_azi))
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     """

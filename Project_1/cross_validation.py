@@ -12,10 +12,10 @@ def cross_validation_visualization(lambds, mse_tr, mse_te):
     plt.semilogx(lambds, mse_te, marker=".", color='r', label='test error')
     plt.xlabel("lambda")
     plt.ylabel("rmse")
-    plt.title("cross validation")
+    plt.title('cross_validation')
     plt.legend(loc=2)
     plt.grid(True)
-    plt.savefig("cross_validation")
+    plt.savefig('cross_validation')
 
 def accuracy(y_predict, y):
     correct = 0
@@ -43,13 +43,13 @@ def cross_validation(y, x, k_indices, k, lambda_, degree):
     #train_setX = build_poly(train_setX,1, degree)
     
     w, mse = ridge_regression(train_setY, train_setX, lambda_)
-    rmse_tr = mse
-    rmse_te = np.sqrt(2 * compute_mse(test_setY, test_setX, w))
+    rmse_tr = compute_rmse(train_setY, train_setX,w)
+    rmse_te = compute_rmse(test_setY, test_setX,w)
     y_te = predict_labels(w, test_setX)
     y_tr = predict_labels(w, train_setX)
     acc_te = accuracy(y_te,test_setY)
     acc_tr = accuracy(y_tr, train_setY)
-    return rmse_tr, rmse_te, acc_tr, acc_te
+    return acc_tr, acc_te, rmse_tr, rmse_te
 
 
 
@@ -73,27 +73,37 @@ def cross_validation_demo(y, tx, lambdas ,degree):
     # split data in k fold
     k_indices = build_k_indices(y, k_fold, seed)
     # define lists to store the loss of training data and test data
-    rmse_tr = []
-    rmse_te = []
+   
     acc_tr = []
     acc_te = []
+    rmse_tr = []
+    rmse_te = []
+    max_te = 0
+    min_te = 10**10
+    min_lambda = 0
+    max_lambda = 0
     for lambda_ in lambdas:
-        tr_temp = 0
-        te_temp = 0
         te = 0
         tr = 0
-        
+        err_tr = 0
+        err_te = 0
         for k in range(k_fold):
-            loss_tr, loss_te, pred_tr, pred_te = cross_validation(y, tx, k_indices, k, lambda_,degree)
-            tr_temp += loss_tr
-            te_temp += loss_te
+            pred_tr, pred_te, loss_tr, loss_te = cross_validation(y, tx, k_indices, k, lambda_,degree)
             te += pred_te
             tr += pred_tr
-        rmse_tr.append(tr_temp/k_fold)
-        rmse_te.append(te_temp/k_fold)
+            err_tr += loss_tr
+            err_te += loss_te
+        if te/k_fold > max_te:
+            max_te = te/k_fold
+            max_lambda = lambda_
+        if err_te/k_fold < min_te:
+            min_te = err_te/k_fold
+            min_lambda = lambda_
         acc_tr.append(tr/k_fold)
         acc_te.append(te/k_fold)
-    print(rmse_tr)
-    print(rmse_te)
-    #cross_validation_visualization(lambdas, rmse_tr, rmse_te)
+        rmse_tr.append(err_tr/k_fold)
+        rmse_te.append(err_te/k_fold)
+    print(max_te, max_lambda)
+    print(min_te,min_lambda)
     cross_validation_visualization(lambdas, acc_tr, acc_te)
+    #cross_validation_visualization(lambdas, rmse_tr, rmse_te)
