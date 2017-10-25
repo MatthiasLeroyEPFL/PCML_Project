@@ -58,8 +58,9 @@ def standardize(x, mean_std=True):
         return x, mean_x, std_x
     return x
 
-def build_poly(x, end, combination):
+def build_poly(x, end, combination, square_combination, square_root_combination):
     matrix_poly = np.array([]).reshape(x.shape[0],0)
+    comb = combinations(x)
     for col in x.transpose():
         
         pol = np.array([col**d for d in range(1, end+1)]).transpose()
@@ -67,7 +68,11 @@ def build_poly(x, end, combination):
         matrix_poly = np.concatenate((matrix_poly,pol),1)
         
     if combination:
-        return np.concatenate((matrix_poly, combinations(x)), 1)
+        matrix_poly = np.concatenate((matrix_poly, comb), 1)
+    if square_combination:
+        matrix_poly = np.concatenate((matrix_poly,np.square(comb)),1)
+    if square_root_combination:
+         matrix_poly = np.concatenate((matrix_poly,np.sqrt(np.abs(comb))),1)
     return matrix_poly
 
 def add_ones(dataset):
@@ -92,17 +97,8 @@ def split_data(x, y, ratio, seed=1):
     return training_setX, testing_setX, training_setY, testing_setY, test_index         
 
 def combinations(dataset):
-    number_col = dataset.shape[1]
-    matrix = np.array([]).reshape(dataset.shape[0],0)
-    for i in range(number_col):
-        for j in range(i+1,number_col):
-            col_i = dataset[:,i]
-            col_j = dataset[:,j]
-        
-            new_col = (col_i * col_j).reshape(dataset.shape[0],1)
-            
-            matrix = np.concatenate((matrix,new_col), 1)
-    return matrix
+    x, y = np.triu_indices(dataset.shape[1], 1)
+    return dataset[:,x] * dataset[:,y]
 
 def compute_momentum(tra_momentum, pseudo_rap, azi_angle):
     x = tra_momentum * np.cos(azi_angle)

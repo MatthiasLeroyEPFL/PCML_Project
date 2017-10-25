@@ -23,6 +23,54 @@ def compute_gradient(y, tx, w):
     gradient = -1/tx.shape[0] * np.dot(np.transpose(tx),e)
     return gradient
 
+def sigmoid_scalar(t):
+    if t > 0:
+        return 1 / (1 + np.exp(-t))
+    return np.exp(t) / (1 + np.exp(t))
+
+sigmoid = np.vectorize(sigmoid_scalar)
+
+def calculate_loss(y, tx, w):
+    return np.sum(np.log(1 + np.exp(tx.dot(w))) - y.transpose().dot(tx.dot(w)))
+
+def calculate_gradient(y, tx, w):
+    temp = sigmoid(tx.dot(w)) - y
+    return tx.transpose().dot(temp)
+
+def calculate_hessian(y, tx, w):
+    S = sigmoid(tx.dot(w)) * (1 - sigmoid(tx.dot(w)))
+    S = np.diag(np.ravel(S))
+    return tx.transpose().dot(S).dot(tx)
+
+def learning_by_newton_method(y, tx, w, gamma):
+    loss = calculate_loss(y, tx, w)
+    gradient = calculate_gradient(y, tx, w)
+    hessian = calculate_hessian(y, tx, w)
+    
+    w = w - gamma * np.linalg.inv(hessian).dot(gradient)
+    return loss, w
+
+def learning_by_gradient_descent(y, tx, w, gamma):
+    
+    loss = calculate_loss(y, tx, w)
+    gradient = calculate_gradient(y, tx, w)
+    w = w - gamma * gradient
+    return loss, w
+
+def penalized_logistic_regression(y, tx, w, lambda_):
+   
+    loss = calculate_loss(y, tx, w) + lambda_ / 2 * np.linalg.norm(w)**2
+    gradient = calculate_gradient(y, tx, w) + lambda_ * w * 2
+    hessian = calculate_hessian(y, tx, w) + np.diag(2 * lambda_ * np.ones(calculate_hessian(y, tx, w).shape[0]))
+    return loss, gradient, hessian
+
+def learning_by_penalized_gradient(y, tx, w, gamma, lambda_):
+    
+    loss, gradient, hessian = penalized_logistic_regression(y, tx, w, lambda_)
+    
+    w = w - gamma * np.linalg.inv(hessian).dot(gradient)
+    return loss, w
+
 def least_squares_GD(y, tx, initial_w, max_iters, gamma):
     w = initial_w
     for n_iter in range(max_iters):
@@ -62,3 +110,29 @@ def ridge_regression(y, tx, lambda_):
     loss = compute_mse(y,tx,w)
     return w, loss
 
+def logistic_regression(y, tx, initial_w, max_iters, gamma):
+    
+   
+    threshold = 1e-8
+    losses = []
+    w = initial_w
+   
+    for iter in range(max_iters):
+        loss, w = learning_by_gradient_descent(y, tx, w, gamma)
+        # converge criterion
+        losses.append(loss)
+        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+            break
+    return w, losses[-1]
+
+        
+    
+def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    
+    w = initial_w
+    
+    for iter in range(max_iters):
+        # get loss and update w.
+        loss, w = learning_by_penalized_newton_method(y, tx, lambda_, w, gamma)
+        
+    return w, loss
