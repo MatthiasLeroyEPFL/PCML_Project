@@ -58,13 +58,11 @@ def standardize(x, mean_std=True):
         return x, mean_x, std_x
     return x
 
-def build_poly(x, end, combination, square_combination, square_root_combination):
+def build_poly(x, end, combination, square_combination, square_root_combination, cube_combination):
     matrix_poly = np.array([]).reshape(x.shape[0],0)
     comb = combinations(x)
     for col in x.transpose():
-        
         pol = np.array([col**d for d in range(1, end+1)]).transpose()
-       
         matrix_poly = np.concatenate((matrix_poly,pol),1)
         
     if combination:
@@ -72,7 +70,9 @@ def build_poly(x, end, combination, square_combination, square_root_combination)
     if square_combination:
         matrix_poly = np.concatenate((matrix_poly,np.square(comb)),1)
     if square_root_combination:
-         matrix_poly = np.concatenate((matrix_poly,np.sqrt(np.abs(comb))),1)
+        matrix_poly = np.concatenate((matrix_poly,np.sqrt(np.abs(comb))),1)
+    if cube_combination:
+        matrix_poly = np.concatenate((matrix_poly, np.log(np.abs(comb))),1)
     return matrix_poly
 
 def add_ones(dataset):
