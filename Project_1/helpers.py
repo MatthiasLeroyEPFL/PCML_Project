@@ -14,7 +14,7 @@ def standardize(x):
     return x, mean_x, std_x
 
 
-def build_poly(x, end, combination, square_combination, square_root_combination):
+def build_poly(x, end, combination, square_combination, square_root_combination, cubic_root_combination):
     ''' 
     Create new features as input
     First create polynomial basis of degree end
@@ -25,7 +25,8 @@ def build_poly(x, end, combination, square_combination, square_root_combination)
     for col in x.transpose():
         pol = np.array([col**d for d in range(1, end+1)]).transpose()
         matrix_poly = np.concatenate((matrix_poly,pol),1)
-        
+    if cubic_root_combination:
+        matrix_poly = np.concatenate((matrix_poly,np.cbrt(comb)), 1)
     if combination:
         matrix_poly = np.concatenate((matrix_poly, comb), 1)
     if square_combination:

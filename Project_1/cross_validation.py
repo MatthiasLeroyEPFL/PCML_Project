@@ -21,9 +21,9 @@ def cross_validation_visualization(lambds, mse_tr, mse_te):
 def cross_validation(y, x, k_indices, k, lambda_, w_initial, gamma):
     """return the loss of ridge regression."""
     x_test = x[k_indices[k]]
-    x_train = np.delete(x,k_indices[k])
+    x_train = np.delete(x,k_indices[k], 0)
     y_test = y[k_indices[k]]
-    y_train = np.delete(y,k_indices[k])
+    y_train = np.delete(y,k_indices[k], 0)
     
     #test_setX = build_poly(test_setX, 1,degree)
     #train_setX = build_poly(train_setX,1, degree)
