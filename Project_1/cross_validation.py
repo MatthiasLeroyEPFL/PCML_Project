@@ -24,7 +24,7 @@ def accuracy(y_predict, y):
             correct += 1
     return correct/len(y)
 
-def cross_validation(y, x, k_indices, k, lambda_, w_initial):
+def cross_validation(y, x, k_indices, k, lambda_, w_initial, gamma):
     """return the loss of ridge regression."""
     test_setX = np.array([]).reshape(0,x.shape[1])
     train_setX = np.array([]).reshape(0,x.shape[1])
@@ -43,9 +43,10 @@ def cross_validation(y, x, k_indices, k, lambda_, w_initial):
     #train_setX = build_poly(train_setX,1, degree)
     w = w_initial
     #w, mse = logistic_regression(train_setY, train_setX, w_initial, 20, lambda_)
-   
-    w, mse = ridge_regression(train_setY, train_setX, lambda_)
-    rmse_tr = np.sqrt(2*mse)
+    w, mse = reg_logistic_regression(train_setY, train_setX, lambda_ , w_initial, 20, gamma)
+    #w, mse = ridge_regression(train_setY, train_setX, lambda_)
+    
+    rmse_tr = np.sqrt(2*compute_mse(train_setY, train_setX, w))
     rmse_te = np.sqrt(2*compute_mse(test_setY, test_setX, w))
     pred = predict_labels(w, test_setX)
     acc = accuracy(pred, test_setY)
@@ -67,7 +68,7 @@ def build_k_indices(y, k_fold, seed):
     return np.array(k_indices)
 
 
-def cross_validation_demo(y, tx, lambdas , degrees=None, w_initial=None):
+def cross_validation_demo(y, tx, lambdas , degrees=None, w_initial=None, gamma=None):
     seed = 1
     k_fold = 5
     # split data in k fold
@@ -82,12 +83,13 @@ def cross_validation_demo(y, tx, lambdas , degrees=None, w_initial=None):
     min_acc = 0
     
     for lambda_ in lambdas:
+        print(lambda_)
         acc_te = 0
         tr = 0
         err_tr = 0
         err_te = 0
         for k in range(k_fold):
-            loss_tr, loss_te, acc = cross_validation(y, tx, k_indices, k, lambda_, w_initial)
+            loss_tr, loss_te, acc = cross_validation(y, tx, k_indices, k, lambda_, w_initial, gamma)
             err_tr += loss_tr
             err_te += loss_te
             acc_te += acc

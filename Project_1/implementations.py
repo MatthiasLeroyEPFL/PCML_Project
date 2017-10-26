@@ -64,7 +64,7 @@ def penalized_logistic_regression(y, tx, w, lambda_):
     hessian = calculate_hessian(y, tx, w) + np.diag(2 * lambda_ * np.ones(calculate_hessian(y, tx, w).shape[0]))
     return loss, gradient, hessian
 
-def learning_by_penalized_gradient(y, tx, w, gamma, lambda_):
+def learning_by_penalized_gradient(y, tx, lambda_, w, gamma ):
     
     loss, gradient, hessian = penalized_logistic_regression(y, tx, w, lambda_)
     
@@ -133,6 +133,6 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     
     for iter in range(max_iters):
         # get loss and update w.
-        loss, w = learning_by_penalized_newton_method(y, tx, lambda_, w, gamma)
+        loss, w = learning_by_penalized_gradient(y, tx, lambda_, w, gamma)
         
     return w, loss
