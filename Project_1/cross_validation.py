@@ -5,6 +5,14 @@ from helpers import *
 import matplotlib.pyplot as plt
 
 
+def accuracy(y, y_pred):
+    correct = 0
+    for i, value in enumerate(y):
+        if value == y_pred[i]:
+            correct += 1
+    return correct / len(y)
+
+
 
 def cross_validation_visualization(lambds, mse_tr, mse_te):
     """visualization the curves of mse_tr and mse_te."""
@@ -28,13 +36,14 @@ def cross_validation(y, x, k_indices, k, lambda_, w_initial, gamma):
     #test_setX = build_poly(test_setX, 1,degree)
     #train_setX = build_poly(train_setX,1, degree)
     w = w_initial
-    #w, mse = logistic_regression(train_setY, train_setX, w_initial, 20, lambda_)
+    #w, mse = logistic_regression(y_train, x_train, w_initial, 20, lambda_)
     #w, mse = reg_logistic_regression(y_train, x_train, lambda_ , w_initial, 20, gamma)
     w, mse = ridge_regression(y_train, x_train, lambda_)
-    
+    y_pred = predict_labels(w, x_test)
+    acc = accuracy(y_test, y_pred)
     rmse_tr = np.sqrt(2*compute_mse(y_train, x_train, w))
     rmse_te = np.sqrt(2*compute_mse(y_test, x_test, w))
-    return rmse_tr, rmse_te
+    return rmse_tr, rmse_te, acc
 
 
 
@@ -63,18 +72,25 @@ def cross_validation_demo(y, tx, lambdas , degrees=None, w_initial=None, gamma=N
     rmse_te = []
     min_te = 10**10
     min_lambda = 0
-    
+    max_acc = 0
+    lambda_acc = 0
     for lambda_ in lambdas:
         err_tr = 0
         err_te = 0
+        accu = 0
         for k in range(k_fold):
-            loss_tr, loss_te = cross_validation(y, tx, k_indices, k, lambda_, w_initial, gamma)
+            loss_tr, loss_te, acc = cross_validation(y, tx, k_indices, k, lambda_, w_initial, gamma)
             err_tr += loss_tr
             err_te += loss_te
+            accu += acc
         if err_te/k_fold < min_te:
             min_te = err_te/k_fold
             min_lambda = lambda_
+        if accu/k_fold > max_acc:
+            max_acc = accu/k_fold
+            lambda_acc = lambda_
         rmse_tr.append(err_tr/k_fold)
         rmse_te.append(err_te/k_fold)
     print(min_te,min_lambda)
+    print(max_acc,lambda_acc)
     cross_validation_visualization(lambdas, rmse_tr, rmse_te)
