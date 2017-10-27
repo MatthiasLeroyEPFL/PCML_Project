@@ -15,42 +15,43 @@
 \maketitle
 
 \begin{abstract}
-  A critical part of scientific discovery is the
-  communication of research findings to peers or the general public.
-  Mastery of the process of scientific communication improves the
-  visibility and impact of research. While this guide is a necessary
-  tool for learning how to write in a manner suitable for publication
-  at a scientific venue, it is by no means sufficient, on its own, to
-  make its reader an accomplished writer. 
-  This guide should be a starting point for further development of 
-  writing skills.
+  The aim of this paper is to make classification of particles over results' experiments. Thus, given a set of features that describe the decay signature of a collision event, we tried to predict if this event was a Higgs boson signal or some background information. We will expose the different machine learning algorithms we tried and the evaluations we made that finally led us to the ridge regression.
 \end{abstract}
 
-\section{Introduction}
+\section{Features Analysis and Data Preparation}
 
-The aim of writing a paper is to infect the mind of your reader with
-the brilliance of your idea~\cite{jones08}. 
-The hope is that after reading your
-paper, the audience will be convinced to try out your idea. In other
-words, it is the medium to transport the idea from your head to your
-reader's head. 
-In the following
-section, we show a common structure of scientific papers and briefly
-outline some tips for writing good papers in
-Section~\ref{sec:tips-writing}.
+The training set is composed of 250 000 samples of each 30 features representing 30 experimental measurements. During our dataset exploratory analysis, we noticed that the 23rd column is discrete and categorical with values in the set {0,1,2,3}. We then decided to divide our training set into 3 subsets (because number 2 and 3 have the same -999). Then in the doc, they explained depending on those 4 categories, other features are defined or not which allows us to split the data based on these categrôries. We also notice that for 2 and 3, features are defined in the same way and so we can merge data set 2/3 and obtain 3 datasets. 
+However, we still have non-defined values in the first column and we decide to split again for each Jet into 2 smaller datasets which containes defined OR nondefined values.
+We then have 6 datasets depending on jets and Mass and with only defined values. This allows us to have two benefits: smaller training dataset (for computation) and more precise one. \\
 
-At that
-point, it is important that the reader is able to reproduce your
-work~\cite{schwab00,wavelab,gentleman05}. This is why it is also
-important that if the work has a computational component, the software
-associated with producing the results are also made available in a
-useful form. Several guidelines for making your user's experience with
-your software as painless as possible is given in
-Section~\ref{sec:tips-software}.
+We then normalize/standardize the data and focus on polynomial basis and feature engineering. \\
 
-This brief guide is by no means sufficient, on its own, to
-make its reader an accomplished writer. The reader is urged to use the
-references to further improve his or her writing skills.
+For each subset, we have at the beginning, said N rows and D features. For the polynomial basis, which goal is to add other features for better training, we then have a subset with still N rows but D*d (d = max degree). This degree is defined thanks to the cross-validation according to the model we use. See Section~\ref{sec:Models and Methods}. Instead of trying to find a different degree for each training dataset we could have chosen a common one big enough to satisfied each set. We would gain in test rapidity but risk to overfit the data. Then, we decide to add more features by modifying and combining existing ones depending on our training set. In fact, features engineering increase considerably our classification precision, but in return our training model asked for more memory and take longer to process. Thus, we try different method in order to find the best trad-off that we could make for each training set. First of all we compute the cross term matrix of our D original features (the one to one product for each column) and get C = (D*(D-1))/2 new features. Then, we decide to add the square, square root and cubic root of these combinations. Thus, if we apply each of these new features of one of our training set, it will be finally composed of N samples and D*d+C*4 features. However, we did not add all these features to all of our training set. In fact, we evaluate the importance of each one of them with our cross validation test and populate our set according to the losses we get. 
+
+
+%The aim of writing a paper is to infect the mind of your reader with
+%the brilliance of your idea~\cite{jones08}. 
+%The hope is that after reading your
+%paper, the audience will be convinced to try out your idea. In other
+%words, it is the medium to transport the idea from your head to your
+%reader's head. 
+%In the following
+%section, we show a common structure of scientific papers and briefly
+%outline some tips for writing good papers in
+%Section~\ref{sec:tips-writing}.
+%
+%At that
+%point, it is important that the reader is able to reproduce your
+%work~\cite{schwab00,wavelab,gentleman05}. This is why it is also
+%important that if the work has a computational component, the software
+%associated with producing the results are also made available in a
+%useful form. Several guidelines for making your user's experience with
+%your software as painless as possible is given in
+%Section~\ref{sec:tips-software}.
+%
+%This brief guide is by no means sufficient, on its own, to
+%make its reader an accomplished writer. The reader is urged to use the
+%references to further improve his or her writing skills.
 
 \section{The Structure of a Paper}
 \label{sec:structure-paper}
