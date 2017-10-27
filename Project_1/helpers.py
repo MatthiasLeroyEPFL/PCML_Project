@@ -127,6 +127,97 @@ def create_dataset(dataset, y, index):
     
     return [jet0_nm, jet0_wm, jet1_nm, jet1_wm, jet2_nm, jet2_wm], [y0_nm, y0_wm, y1_nm, y1_wm, y2_nm, y2_wm]
 
+def compute_pseudo_rapidity(dataset, indexA, indexB):
+    return np.abs(dataset[:,indexA] - dataset[:,indexB])
+
+
+def add_features_jet0_wm(dataset):
+    index_tau = [9, 10, 11]
+    index_lep = [12, 13, 14]
+    index_met = [15, 16, 17]
+    
+    features_to_add = []
+    
+    
+    features_to_add.append(compute_pseudo_rapidity(dataset, 9, 12))
+        
+    features_to_add = np.array(features_to_add).transpose()
+    
+    print(features_to_add.shape)
+    return np.concatenate((dataset,features_to_add), 1)
+
+def add_features_jet0_nm(dataset):
+    index_tau = [8, 9, 10]
+    index_lep = [11, 12, 13]
+    index_met = [14, 15, 16]
+    
+    features_to_add = []
+    
+    
+    features_to_add.append(compute_pseudo_rapidity(dataset, 9, 12))
+        
+    features_to_add = np.array(features_to_add).transpose()
+    
+    print(features_to_add.shape)
+    return np.concatenate((dataset,features_to_add), 1)
+
+def add_features_jet1_nm(dataset):
+    index_tau = [8, 9, 10]
+    index_lep = [11, 12, 13]
+    index_met = [14, 15, 16]
+    jet_leading = [17,18,19]
+    features_to_add = []
+    
+    
+    features_to_add.append(compute_pseudo_rapidity(dataset, 9, 12))
+    features_to_add.append(compute_pseudo_rapidity(dataset, 9, 18))
+    features_to_add.append(compute_pseudo_rapidity(dataset, 12, 18))
+    
+    features_to_add = np.array(features_to_add).transpose()
+    
+    print(features_to_add.shape)
+    return np.concatenate((dataset,features_to_add), 1)
+
+
+def add_features_jet1_wm(dataset):
+    index_tau = [9, 10, 11]
+    index_lep = [12, 13, 14]
+    index_met = [15, 16, 17]
+    jet_leading = [18,19,20]
+    
+    features_to_add = []
+    
+    
+    features_to_add.append(compute_pseudo_rapidity(dataset, 10, 13))
+    features_to_add.append(compute_pseudo_rapidity(dataset, 10, 19))
+    features_to_add.append(compute_pseudo_rapidity(dataset, 13, 19))
+        
+    features_to_add = np.array(features_to_add).transpose()
+    
+    print(features_to_add.shape)
+    return np.concatenate((dataset,features_to_add), 1)
+
+def add_features_jet2_wm(dataset):
+    index_tau = [13, 14, 15]
+    index_lep = [16, 17, 18]
+    index_met = [19, 20, 21]
+    jet_leading = [22,23,24]
+    jet_sub = [25,26,27]
+    features_to_add = []
+    
+    
+    features_to_add.append(compute_pseudo_rapidity(dataset, 14, 17))
+    features_to_add.append(compute_pseudo_rapidity(dataset, 14, 23))
+    features_to_add.append(compute_pseudo_rapidity(dataset, 14, 26))
+    features_to_add.append(compute_pseudo_rapidity(dataset, 17, 23))
+    features_to_add.append(compute_pseudo_rapidity(dataset, 17, 26))
+    
+    
+    features_to_add = np.array(features_to_add).transpose()
+    
+    print(features_to_add.shape)
+    return np.concatenate((dataset,features_to_add), 1)
+
 
 def batch_iter(y, tx, batch_size, num_batches=1, shuffle=True):
     """

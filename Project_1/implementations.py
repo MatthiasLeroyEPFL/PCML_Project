@@ -62,7 +62,7 @@ def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
     w = initial_w
     for iter in range(max_iters):
         # get loss and update w.
-        loss, w = learning_by_penalized_newton_method(y, tx, lambda_, w, gamma)    
+        loss, w = learning_by_penalized_gradient(y, tx, lambda_, w, gamma)    
     return w, loss
 
 
@@ -132,12 +132,12 @@ def learning_by_gradient_descent(y, tx, w, gamma):
 def penalized_logistic_regression(y, tx, w, lambda_):
     loss = calculate_loss(y, tx, w) + lambda_ / 2 * np.linalg.norm(w)**2
     gradient = calculate_gradient(y, tx, w) + lambda_ * w * 2
-    hessian = calculate_hessian(y, tx, w) + np.diag(2 * lambda_ * np.ones(calculate_hessian(y, tx, w).shape[0]))
-    return loss, gradient, hessian
+    #hessian = calculate_hessian(y, tx, w) + np.diag(2 * lambda_ * np.ones(calculate_hessian(y, tx, w).shape[0]))
+    return loss, gradient
 
 #One step of gradient descent using regularized logistic regression
 def learning_by_penalized_gradient(y, tx, lambda_, w, gamma ):
-    loss, gradient, hessian = penalized_logistic_regression(y, tx, w, lambda_)
-    w = w - gamma * np.linalg.inv(hessian).dot(gradient)
+    loss, gradient = penalized_logistic_regression(y, tx, w, lambda_)
+    w = w - gamma * gradient
     return loss, w
 
