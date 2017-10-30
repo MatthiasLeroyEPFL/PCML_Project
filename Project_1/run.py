@@ -1,4 +1,4 @@
-''' This programs reproduce the prediction.csv file with the best score on Kaggle'''
+''' This program reproduce the prediction.csv file with the best score on Kaggle'''
 
 import numpy as np
 from proj1_helpers import *
