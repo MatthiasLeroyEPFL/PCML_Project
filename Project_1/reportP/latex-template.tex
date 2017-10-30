@@ -24,9 +24,9 @@ The training set is composed of $250 000$ samples of each $30$ features represen
 
 Moreover, the documentation of the contest (~\ref{sec:ref}) explained the dependence between the $23^{rd}$ column and all the other ones (some ones are not defined ($-999$) according to the value of \textit{PRI.jet.num}. That is why, we divided our data in three different sets according to the \textit{PRI.jet.num} values ($2$ and $3$ have the same features dependence, therefore we combined them). Thus, we could drop uninteresting features for each sets, that could allowed us to optimize the training. However, despite this first cleaning, we still had non-defined values ($-999$) in the first feature (\textit{DER.mass.MMC}). Thus, we decided to split again our three sets into $2$ smaller ones which contains defined or non-defined values in \textit{DER.mass.MMC} feature (and we drop this column for the non-defined ones).
 
-Finally, we obtain six datasets depending on textit{PRI.jet.num} and \textit{DER.mass.MMC} with only defined values. This allows us to have two benefits for the computations: smaller training datasets and more precise one.
+Finally, we obtain six datasets depending on textit{PRI.jet.num} and \textit{DER.mass.MMC} with only defined values. This allows us to have two benefits for the computations: smaller training datasets and more precise one. 
 
-From now, we standardized each dataset and focused on polynomial basis. Thus, for each subset, we have at the beginning $N$ rows and $D$ features. For the polynomial basis, whose goal is to add new features for better training, we have a subset with still $N$ rows but $D\times d$ ($d$ = max degree). This degree is defined thanks to the cross-validation according to the model we use (more explained in next section). Instead of trying to find a different degree for each training dataset we could have chosen a common one big enough to satisfied each set. We would gain in test rapidity but with the risk to overfit the data.\\ 
+From now, we standardized each dataset and focused on polynomial basis. Thus, for each subset, we have at the beginning $N$ rows and $D$ features. For the polynomial basis, whose goal is to add new features for better training, we have a subset with still $N$ rows but $D\times d$ ($d$ = max degree). This degree is defined thanks to the cross-validation according to the model we use (more explained in next section). Instead of trying to find a different degree for each training dataset we could have chosen a common one big enough to satisfied each set. We would gain in test rapidity but with the risk to overfit the data. 
 
 Then, we realise that could added still more features in order to improve our prediction. However, features processing is more detailed in the last part of this report since we first implemented our models and then we tried to improve them thanks to features engineering.
 
@@ -45,14 +45,14 @@ Then, we realise that could added still more features in order to improve our pr
     jet2wm&0.7&0.0071&3&True&True&True&True&True\\
     \hline
   \end{tabular}
-  \caption{Hyperparameters and features combinations for ridge regression using normal equations.}
+  \caption{Hyper-parameters and features combinations for ridge regression using normal equations.}
   \label{tab:table1}
 \end{table*}
 
 \section{Models and Methods}
 \label{sec:structure-paper}
 
-In order to make our predictions, we tested $6$ different machine learning methods and tried to improve according to the results/validation evaluations we got. For a best model evaluation, we implemented a 5-fold cross-validation because we got validation sets of $50 000$ samples which is equivalent to a $20\%-80\%$ split of test and training data). 
+In order to make our predictions, we tested $6$ different machine learning methods and tried to improve our predictions  according to the results/validation evaluations we got. For a best model evaluation, we implemented a 5-fold cross-validation because we got validation sets of $50 000$ samples which is equivalent to a $20\%-80\%$ split of test and training data). 
 
 We first tried a linear regression using a gradient descent. Our first questioning was to find a correct learning rate $\gamma$ in order to converge to the best parameters $\mathbf{w^*}$ for the minimum cost function that we could possibly find with this optimization algorithm. After testing different values for $\gamma$ it was finally possible to make our first prediction. 
 
@@ -66,19 +66,19 @@ From this result, we tried to improve it with extended features vectors. Indeed,
 
 Therefore, after running our 5-fold cross-validation we find a set of 6 $degre, \lambda$ couples for each dataset, that minimize the losses. Finally, we got a better prevision than with the Least Square model, we obtained $0.83745$ on Kaggle. Surprisingly, the $lambdas$ that gave us the best results were a bit small, thus, Least Square model was not over-fitting that much as we can see in Figure \ref{fig:figure1}.
 Then, we implemented the logistic regression with gradient descent. We had good hope for this model because it is supposed to be optimized for classification problems. However, after training our data and find our learning rate $\gamma$ (for the gradient descent) and the degrees of our polynomial basis we were not able to reduce the loss compared to the ridge regression. In fact, we got a prediction score of $0.83450$ on Kaggle, which was close but not good enough.
-Finally, we did not succeed to implement the regularized logistic regression. Our cross validation never converge and we were not able to find our best hyper-parameters for this models.
+Finally, we did not succeed to implement the regularized logistic regression. Our cross validation never converged and we were not able to find our best hyper-parameters for these models.
 
 \begin{figure}[tbp]
   \centering
   \includegraphics[width=\columnwidth]{cross-validation}
-  \caption{5-fold cross-validation for ridge regression in order to find the best hyperparameter $\lambda$.}
+  \caption{5-fold cross-validation for ridge regression in order to find the best hyper-parameter $\lambda$.}
   \vspace{-3mm}
   \label{fig:figure1}
 \end{figure}
 
 \section{Improving Prediction}
 
-After, we found our best prediction, we asked ourself how we could continue to improve it. In fact, at the beginning of the challenge we tried models we have implemented directly on the 30 features dataset we downloaded and the polynomial basis. Without thinking about features engineering. It ended up with a very high bias over our estimation. In fact, it was not bother us to much when we start because the training and validation errors were very close when we ran the cross validation but, the error itself was not small enough for our prediction goal. That is why, we decided to add more features by modifying and combining existing ones depending on our training set. In fact, features engineering increases considerably our classification precision, but in return our training model needed more memory and took a longer processing time. Thus, we try different methods in order to find the best trade-off for each training set. 
+After, we found our best prediction, we asked ourselves how we could continue to improve it. In fact, at the beginning of the challenge we tried models we have implemented directly on the 30 features dataset we downloaded and the polynomial basis. Without thinking about features engineering. It ended up with a very high bias over our estimation. In fact, it was not bother us to much when we start because the training and validation errors were very close when we ran the cross validation but, the error itself was not small enough for our prediction goal. That is why, we decided to add more features by modifying and combining existing ones depending on our training set. In fact, features engineering increases considerably our classification precision, but in return our training model needed more memory and took a longer processing time. Thus, we try different methods in order to find the best trade-off for each training set. 
 
 First of all we compute the cross term matrix of our $D$ original features (the one to one product for each column) and get $C = \frac{D\times(D-1)}{2}$ new features. We also add the square, square root, cubic root and absolute value of these combinations. Thus, if we apply each of these new features to one of our training set, it is finally composed of $N$ samples and $D\times d + C\times5$ features. However, we didn't add all of these features to all of our training set but evaluated the importance of each thanks to our cross validation test and populated our set according to the losses we get.
 
@@ -86,7 +86,7 @@ Thus, we can see on the Table~\ref{tab:table1} the losses we got with the parame
 
 \section{Conclusion}
 
-Finally, after trying different learning algorithm we achieved to find a prediction with a Kaggle score of $0.83912$ using the ridge regression with normal equation. In fact, we mainly increase our performances by improving and working on the features of the dataset. However, we think that could made even better with a regularized logistic with well tuned hyperparameters. Finally, it will be interesting to see what will be the effect of the more complex models we are going for this classification.
+Finally, after trying different learning algorithms we achieved to find a prediction with a Kaggle score of $0.83912$ using the ridge regression with normal equation. In fact, we mainly increased our performances by improving and working on the features of the dataset. However, we think that could made even better with a regularized logistic with well tuned hyper-parameters. Finally, it could be interesting to see what would be the effects of more complex models we'll see in class for this classification.
 
 \section{Reference} \label{sec:ref}
 
