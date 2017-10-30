@@ -34,7 +34,6 @@ degrees = [2, 3, 2, 4, 2, 3]
 cross_terms = [[False, False, True, True], [True, False, True, False], [False, False, True, True],
                [True, False, True, True], [False, False, False, True], [True, True, True, True]]
 train_datasets, test_datasets = build_poly_cross_datasets(train_datasets, test_datasets, degrees, cross_terms)
-print(train_datasets[5].shape)
 
 
 print('Training the model...')

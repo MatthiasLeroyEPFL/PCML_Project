@@ -5,13 +5,6 @@ from helpers import *
 import matplotlib.pyplot as plt
 
 
-def accuracy(y, y_pred):
-    correct = 0
-    for i, value in enumerate(y):
-        if value == y_pred[i]:
-            correct += 1
-    return correct / len(y)
-
 
 
 def cross_validation_visualization(lambds, mse_tr, mse_te):
@@ -26,24 +19,24 @@ def cross_validation_visualization(lambds, mse_tr, mse_te):
     plt.savefig('cross_validation')
 
 
-def cross_validation(y, x, k_indices, k, lambda_, w_initial, gamma):
+def cross_validation(y, x, k_indices, k, lambda_, degree, w_initial, gamma):
     """return the loss of ridge regression."""
     x_test = x[k_indices[k]]
     x_train = np.delete(x,k_indices[k], 0)
     y_test = y[k_indices[k]]
     y_train = np.delete(y,k_indices[k], 0)
     
-    #test_setX = build_poly(test_setX, 1,degree)
-    #train_setX = build_poly(train_setX,1, degree)
+    x_train, mean, std = standardize(build_poly_cross(x_train, degree, [False, False, False, False]))
+    x_test = (build_poly_cross(x_test, degree, [False, False, False, False]) - mean) / std
+   
     w = w_initial
     #w, mse = logistic_regression(y_train, x_train, w_initial, 500, lambda_)
     #w, mse = reg_logistic_regression(y_train, x_train, lambda_ , w_initial, 20, gamma)
     w, mse = ridge_regression(y_train, x_train, lambda_)
-    y_pred = predict_labels(w, x_test)
-    acc = accuracy(y_test, y_pred)
+ 
     rmse_tr = np.sqrt(2*compute_mse(y_train, x_train, w))
     rmse_te = np.sqrt(2*compute_mse(y_test, x_test, w))
-    return rmse_tr, rmse_te, acc
+    return rmse_tr, rmse_te
 
 
 
@@ -72,29 +65,24 @@ def cross_validation_demo(y, tx, lambdas , degrees=None, w_initial=None, gamma=N
     rmse_te = []
     min_te = 10**10
     min_lambda = 0
-    max_acc = 0
-    temp_acc = 0
-    temp_rmse = 0
-    lambda_acc = 0
+    deg = 0
+   
     for lambda_ in lambdas:
-        err_tr = 0
-        err_te = 0
-        accu = 0
-        for k in range(k_fold):
-            loss_tr, loss_te, acc = cross_validation(y, tx, k_indices, k, lambda_, w_initial, gamma)
-            err_tr += loss_tr
-            err_te += loss_te
-            accu += acc
-        if err_te/k_fold < min_te:
-            min_te = err_te/k_fold
-            min_lambda = lambda_
-            temp_acc = accu/k_fold
-        if accu/k_fold > max_acc:
-            max_acc = accu/k_fold
-            lambda_acc = lambda_
-            temp_rmse = err_te/k_fold
-        rmse_tr.append(err_tr/k_fold)
-        rmse_te.append(err_te/k_fold)
-    print(min_te, temp_acc,min_lambda)
-    print(temp_rmse, max_acc,lambda_acc)
-    cross_validation_visualization(lambdas, rmse_tr, rmse_te)
+        for degree in degrees:
+            err_tr = 0
+            err_te = 0
+            for k in range(k_fold):
+                loss_tr, loss_te = cross_validation(y, tx, k_indices, k, lambda_, degree, w_initial, gamma)
+                err_tr += loss_tr
+                err_te += loss_te
+        
+            if err_te/k_fold < min_te:
+                min_te = err_te/k_fold
+                min_lambda = lambda_
+                deg = degree
+        
+            rmse_tr.append(err_tr/k_fold)
+            rmse_te.append(err_te/k_fold)
+    
+    print(min_te, min_lambda, deg)
+    #cross_validation_visualization(lambdas, rmse_tr, rmse_te)
