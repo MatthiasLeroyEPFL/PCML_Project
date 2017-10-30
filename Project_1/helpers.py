@@ -14,25 +14,31 @@ def standardize(x):
     return x, mean_x, std_x
 
 
-def build_poly(x, end, combination, square_combination, square_root_combination, cubic_root_combination):
+def build_poly_cross(x, end, combination_types):
     ''' 
     Create new features as input
     First create polynomial basis of degree end
-    Then concatenate with cross-terms, square cross-terms and square root cross-terms'''
+    Then concatenate with cross-terms [0], square cross-terms [1], cubic root cross-terms [2],
+    absolute value of x [3] and square root cross-terms
+    '''
     
     matrix_poly = np.array([]).reshape(x.shape[0],0)
     comb = combinations(x)
     for col in x.transpose():
         pol = np.array([col**d for d in range(1, end+1)]).transpose()
         matrix_poly = np.concatenate((matrix_poly,pol),1)
-    if cubic_root_combination:
+    
+    if combination_types[2]:
         matrix_poly = np.concatenate((matrix_poly,np.cbrt(comb)), 1)
-    if combination:
+    if combination_types[0]:
         matrix_poly = np.concatenate((matrix_poly, comb), 1)
-    if square_combination:
+    if combination_types[1]:
         matrix_poly = np.concatenate((matrix_poly,np.square(comb)),1)
-    if square_root_combination:
-         matrix_poly = np.concatenate((matrix_poly,np.sqrt(np.abs(comb))),1)
+    if combination_types[3]:
+        matrix_poly = np.concatenate((matrix_poly,np.abs(x)),1)
+    
+    matrix_poly = np.concatenate((matrix_poly,np.sqrt(np.abs(comb))),1)
+    
     return matrix_poly
 
 
@@ -127,6 +133,48 @@ def create_dataset(dataset, y, index):
     
     return [jet0_nm, jet0_wm, jet1_nm, jet1_wm, jet2_nm, jet2_wm], [y0_nm, y0_wm, y1_nm, y1_wm, y2_nm, y2_wm]
 
+def preprocessed_dataset(train_sets, test_sets):
+    preprocessed_test_sets = []
+    preprocessed_train_sets = []
+    for i, jet_set in enumerate(train_sets):
+        jet_set, mean, std = standardize(jet_set)
+        preprocessed_test_sets.append((test_sets[i] - mean) / std)
+        preprocessed_train_sets.append(jet_set)
+    return preprocessed_train_sets, preprocessed_test_sets
+
+def add_features(train_sets, test_sets):
+    train_sets[0] = add_features_jet0_nm(train_sets[0])
+    test_sets[0] = add_features_jet0_nm(test_sets[0])
+    
+    train_sets[1] = add_features_jet0_wm(train_sets[1])
+    test_sets[1] = add_features_jet0_wm(test_sets[1])
+    
+    train_sets[2] = add_features_jet1_nm(train_sets[2])
+    test_sets[2] = add_features_jet1_nm(test_sets[2])
+    
+    train_sets[3] = add_features_jet1_wm(train_sets[3])
+    test_sets[3] = add_features_jet1_wm(test_sets[3])
+    
+    train_sets[5] = add_features_jet2_wm(train_sets[5])
+    test_sets[5] = add_features_jet2_wm(test_sets[5])
+    
+    return train_sets, test_sets
+    
+def build_poly_cross_datasets(train_sets, test_sets):
+    final_train_sets = []
+    final_test_sets = []
+    degrees = [2, 3, 2, 4, 2, 3]
+    cross_terms = [[False, False, True, True], [True, False, True, False], [False, False, True, True],
+                   [True, False, True, True], [False, False, False, True], [True, True, True, True]]
+    
+    for i, jet_set in enumerate(train_sets):
+        temp_set, mean, std = standardize(build_poly_cross(jet_set, degrees[i], cross_terms[i]))
+        final_test_sets.append(add_ones((build_poly_cross(test_sets[i], degrees[i], cross_terms[i]) - mean) / std))
+        final_train_sets.append(add_ones(temp_set))
+    
+    return final_train_sets, final_test_sets
+    
+
 def compute_pseudo_rapidity(dataset, indexA, indexB):
     return np.abs(dataset[:,indexA] - dataset[:,indexB])
 
@@ -138,12 +186,10 @@ def add_features_jet0_wm(dataset):
     
     features_to_add = []
     
-    
     features_to_add.append(compute_pseudo_rapidity(dataset, 9, 12))
         
     features_to_add = np.array(features_to_add).transpose()
     
-    print(features_to_add.shape)
     return np.concatenate((dataset,features_to_add), 1)
 
 def add_features_jet0_nm(dataset):
@@ -153,12 +199,10 @@ def add_features_jet0_nm(dataset):
     
     features_to_add = []
     
-    
     features_to_add.append(compute_pseudo_rapidity(dataset, 9, 12))
         
     features_to_add = np.array(features_to_add).transpose()
     
-    print(features_to_add.shape)
     return np.concatenate((dataset,features_to_add), 1)
 
 def add_features_jet1_nm(dataset):
@@ -175,7 +219,6 @@ def add_features_jet1_nm(dataset):
     
     features_to_add = np.array(features_to_add).transpose()
     
-    print(features_to_add.shape)
     return np.concatenate((dataset,features_to_add), 1)
 
 
@@ -194,7 +237,6 @@ def add_features_jet1_wm(dataset):
         
     features_to_add = np.array(features_to_add).transpose()
     
-    print(features_to_add.shape)
     return np.concatenate((dataset,features_to_add), 1)
 
 def add_features_jet2_wm(dataset):
@@ -215,7 +257,6 @@ def add_features_jet2_wm(dataset):
     
     features_to_add = np.array(features_to_add).transpose()
     
-    print(features_to_add.shape)
     return np.concatenate((dataset,features_to_add), 1)
 
 

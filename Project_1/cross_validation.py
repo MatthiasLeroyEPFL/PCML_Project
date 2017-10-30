@@ -36,7 +36,7 @@ def cross_validation(y, x, k_indices, k, lambda_, w_initial, gamma):
     #test_setX = build_poly(test_setX, 1,degree)
     #train_setX = build_poly(train_setX,1, degree)
     w = w_initial
-    #w, mse = logistic_regression(y_train, x_train, w_initial, 20, lambda_)
+    #w, mse = logistic_regression(y_train, x_train, w_initial, 500, lambda_)
     #w, mse = reg_logistic_regression(y_train, x_train, lambda_ , w_initial, 20, gamma)
     w, mse = ridge_regression(y_train, x_train, lambda_)
     y_pred = predict_labels(w, x_test)
@@ -73,6 +73,8 @@ def cross_validation_demo(y, tx, lambdas , degrees=None, w_initial=None, gamma=N
     min_te = 10**10
     min_lambda = 0
     max_acc = 0
+    temp_acc = 0
+    temp_rmse = 0
     lambda_acc = 0
     for lambda_ in lambdas:
         err_tr = 0
@@ -86,11 +88,13 @@ def cross_validation_demo(y, tx, lambdas , degrees=None, w_initial=None, gamma=N
         if err_te/k_fold < min_te:
             min_te = err_te/k_fold
             min_lambda = lambda_
+            temp_acc = accu/k_fold
         if accu/k_fold > max_acc:
             max_acc = accu/k_fold
             lambda_acc = lambda_
+            temp_rmse = err_te/k_fold
         rmse_tr.append(err_tr/k_fold)
         rmse_te.append(err_te/k_fold)
-    print(min_te,min_lambda)
-    print(max_acc,lambda_acc)
+    print(min_te, temp_acc,min_lambda)
+    print(temp_rmse, max_acc,lambda_acc)
     cross_validation_visualization(lambdas, rmse_tr, rmse_te)
