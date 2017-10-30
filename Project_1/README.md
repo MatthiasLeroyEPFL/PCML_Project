@@ -26,7 +26,9 @@ Then download the two datasets files (train.csv and test.csv) on the data tab of
 and place them into the same folder than the file run.py
 
 Run in a terminal/console the following command:
+```python
 python run.py
+```
 (Assuming you are running python3 as default, otherwise, run "python3.5 run.py" instead)
 
 This will generate a file called "prediction.csv" in the current folder.
