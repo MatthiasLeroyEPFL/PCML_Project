@@ -2,7 +2,6 @@
 
 import numpy as np
 from proj1_helpers import *
-import matplotlib.pyplot as plt
 
 
 def standardize(x):
@@ -51,27 +50,6 @@ def combinations(dataset):
     '''Create cross-terms for the data.'''
     x, y = np.triu_indices(dataset.shape[1], 1)
     return dataset[:,x] * dataset[:,y]
-
-
-def data_wrangling(jets_datasets, y_datasets, jets_datasets_test, y_datasets_test, 
-                   column, deg, combination, square_combination, square_root_combination):
-    '''Function which takes as parameters: 4 datasets, an index of a column, a polynomial degreee
-        and 3 boolean values corresponding to 3 methods which expand our features. 
-        Returns processed train and test datasets.'''
-    
-    data_train, mean_train, std_train = standardize(jets_datasets[column])
-    y_train = y_datasets[column]
-    
-    data_test = (jets_datasets_test[column] - mean_train) / std_train
-    y_test = y_datasets_test[column]
-    
-    data_train, mean_train, std_train = standardize(build_poly(data_train, deg, combination, square_combination, square_root_combination))
-    data_test = (build_poly(data_test, deg, combination, square_combination, square_root_combination) - mean_train) / std_train
-    
-    data_train = add_ones(data_train)
-    data_test = add_ones(data_test)
-    
-    return data_train, data_test, y_train, y_test
 
 
 def indexes_by_features(features, features_test):
@@ -133,6 +111,7 @@ def create_dataset(dataset, y, index):
     
     return [jet0_nm, jet0_wm, jet1_nm, jet1_wm, jet2_nm, jet2_wm], [y0_nm, y0_wm, y1_nm, y1_wm, y2_nm, y2_wm]
 
+''' Standardize the train and test datasets'''
 def preprocessed_dataset(train_sets, test_sets):
     preprocessed_test_sets = []
     preprocessed_train_sets = []
@@ -142,6 +121,7 @@ def preprocessed_dataset(train_sets, test_sets):
         preprocessed_train_sets.append(jet_set)
     return preprocessed_train_sets, preprocessed_test_sets
 
+''' Add features to the different datasets'''
 def add_features(train_sets, test_sets):
     train_sets[0] = add_features_jet0_nm(train_sets[0])
     test_sets[0] = add_features_jet0_nm(test_sets[0])
@@ -159,13 +139,12 @@ def add_features(train_sets, test_sets):
     test_sets[5] = add_features_jet2_wm(test_sets[5])
     
     return train_sets, test_sets
-    
-def build_poly_cross_datasets(train_sets, test_sets):
+
+
+''' Build the finals datasets with polynomial and cross-terms for each datasets'''
+def build_poly_cross_datasets(train_sets, test_sets, degrees, cross_terms):
     final_train_sets = []
     final_test_sets = []
-    degrees = [2, 3, 2, 4, 2, 3]
-    cross_terms = [[False, False, True, True], [True, False, True, False], [False, False, True, True],
-                   [True, False, True, True], [False, False, False, True], [True, True, True, True]]
     
     for i, jet_set in enumerate(train_sets):
         temp_set, mean, std = standardize(build_poly_cross(jet_set, degrees[i], cross_terms[i]))
@@ -174,15 +153,12 @@ def build_poly_cross_datasets(train_sets, test_sets):
     
     return final_train_sets, final_test_sets
     
-
+'''Compute the pseudo-rapidity separation between two particles'''
 def compute_pseudo_rapidity(dataset, indexA, indexB):
     return np.abs(dataset[:,indexA] - dataset[:,indexB])
 
-
+''' Add pseudo rapidity separation for the jet_0_wm dataset'''
 def add_features_jet0_wm(dataset):
-    index_tau = [9, 10, 11]
-    index_lep = [12, 13, 14]
-    index_met = [15, 16, 17]
     
     features_to_add = []
     
@@ -192,10 +168,8 @@ def add_features_jet0_wm(dataset):
     
     return np.concatenate((dataset,features_to_add), 1)
 
+''' Add pseudo rapidity separation for the jet_0_nm dataset'''
 def add_features_jet0_nm(dataset):
-    index_tau = [8, 9, 10]
-    index_lep = [11, 12, 13]
-    index_met = [14, 15, 16]
     
     features_to_add = []
     
@@ -205,11 +179,9 @@ def add_features_jet0_nm(dataset):
     
     return np.concatenate((dataset,features_to_add), 1)
 
+''' Add pseudo rapidity separation for the jet_1_nm dataset'''
 def add_features_jet1_nm(dataset):
-    index_tau = [8, 9, 10]
-    index_lep = [11, 12, 13]
-    index_met = [14, 15, 16]
-    jet_leading = [17,18,19]
+    
     features_to_add = []
     
     
@@ -221,12 +193,8 @@ def add_features_jet1_nm(dataset):
     
     return np.concatenate((dataset,features_to_add), 1)
 
-
+''' Add pseudo rapidity separation for the jet_1_wm dataset'''
 def add_features_jet1_wm(dataset):
-    index_tau = [9, 10, 11]
-    index_lep = [12, 13, 14]
-    index_met = [15, 16, 17]
-    jet_leading = [18,19,20]
     
     features_to_add = []
     
@@ -239,12 +207,9 @@ def add_features_jet1_wm(dataset):
     
     return np.concatenate((dataset,features_to_add), 1)
 
+''' Add pseudo rapidity separation for the jet_2_wm dataset'''
 def add_features_jet2_wm(dataset):
-    index_tau = [13, 14, 15]
-    index_lep = [16, 17, 18]
-    index_met = [19, 20, 21]
-    jet_leading = [22,23,24]
-    jet_sub = [25,26,27]
+   
     features_to_add = []
     
     

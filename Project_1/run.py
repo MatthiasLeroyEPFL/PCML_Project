@@ -1,8 +1,9 @@
+''' This programs reproduce the prediction.csv file with the best score on Kaggle'''
+
 import numpy as np
 from proj1_helpers import *
 from implementations import *
 from helpers import *
-from cross_validation import *
 
 
 print('Loading the datasets...')
@@ -28,7 +29,12 @@ preprocessed_train_datasets, preprocessed_test_datasets  = preprocessed_dataset(
 train_datasets, test_datasets = add_features(preprocessed_train_datasets, preprocessed_test_datasets)
 
 '''Build the polynomial and the cross terms for test and train'''
-train_datasets, test_datasets = build_poly_cross_datasets(train_datasets, test_datasets)
+
+degrees = [2, 3, 2, 4, 2, 3]
+cross_terms = [[False, False, True, True], [True, False, True, False], [False, False, True, True],
+               [True, False, True, True], [False, False, False, True], [True, True, True, True]]
+train_datasets, test_datasets = build_poly_cross_datasets(train_datasets, test_datasets, degrees, cross_terms)
+print(train_datasets[5].shape)
 
 
 print('Training the model...')

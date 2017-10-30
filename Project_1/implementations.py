@@ -1,7 +1,7 @@
 '''This file groups the 6 asked methods and some useful additionnal others'''
 
 import numpy as np
-
+from helpers import *
 
 
 '''------------ 6 Required Methods ------------'''
@@ -21,8 +21,8 @@ def least_squares_SGD(y, tx, initial_w, max_iters, gamma):
     batch_size = 1
     w = initial_w
     loss = 0
-    for batch_y, batch_x in batch_iter(y, tx, batch_size, max_iters):
-        gradient = compute_stoch_gradient(batch_y, batch_x, w)
+    for batch_y, batch_x in batch_iter(y, tx, batch_size, num_batches=max_iters):
+        gradient = compute_gradient(batch_y, batch_x, w)
         loss = compute_mse(y, tx, w)
         w = w - gamma * gradient          
     return w, loss
@@ -59,11 +59,17 @@ def logistic_regression(y, tx, initial_w, max_iters, gamma):
         
 #Regularized logistic regression using gradient descent
 def reg_logistic_regression(y, tx, lambda_, initial_w, max_iters, gamma):
+    threshold = 1e-8
+    losses = []
     w = initial_w
     for iter in range(max_iters):
         # get loss and update w.
-        loss, w = learning_by_penalized_gradient(y, tx, lambda_, w, gamma)    
-    return w, loss
+        loss, w = learning_by_penalized_gradient(y, tx, lambda_, w, gamma)
+        # converge criterion
+        losses.append(loss)
+        if len(losses) > 1 and np.abs(losses[-1] - losses[-2]) < threshold:
+            break
+    return w, losses[-1]
 
 
 
