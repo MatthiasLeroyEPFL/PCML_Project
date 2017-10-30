@@ -1,8 +1,8 @@
 # [Machine Learning] - Higg's Boson 
 
-*This project is part of the Machine Learning course at EPFL by Prof. Urbanke & Prof. Jaggi.
+*This project is part of the Machine Learning course at EPFL by Prof. Urbanke & Prof. Jaggi.*
 
-Implemented by Pierre Fouche, Matthias Leroy and Alexandre Poussard.*
+*Implemented by Pierre Fouche, Matthias Leroy and Alexandre Poussard.*
 
 The aim of this project is to determine if a particle is a Higg's Boson in a big dataset, using various Machine Learning techniques.
 
