@@ -5,46 +5,44 @@ def update_user_feature(
         train, item_features, lambda_user,
         nnz_items_per_user, nz_user_itemindices):
     """update user feature matrix."""
-    num_user = nnz_items_per_user.shape[0]
-    num_feature = item_features.shape[0]
+    num_user = train.shape[1]
+    num_feature = item_features.shape[1]
     lambda_I = lambda_user * sp.eye(num_feature)
-    updated_user_features = np.zeros((num_feature, num_user))
+    updated_user_features = np.zeros((num_user, num_feature))
 
     for user, items in nz_user_itemindices:
-        # extract the columns corresponding to the prediction for given item
-        M = item_features[:, items]
         
-        # update column row of user features
-        V = M @ train[items, user]
-        A = M @ M.T + nnz_items_per_user[user] * lambda_I
-        X = np.linalg.solve(A, V)
-        updated_user_features[:, user] = np.copy(X.T)
+        solve_A = item_features[items,:].T.dot(item_features[items,:]) + lambda_I
+        solve_B = item_features[items,:].T * train[items, user]
+        
+        X = np.linalg.solve(solve_A, solve_B)
+        
+        updated_user_features[user,:] = X.squeeze(axis=1)
     return updated_user_features
 
 def update_item_feature(
         train, user_features, lambda_item,
         nnz_users_per_item, nz_item_userindices):
     """update item feature matrix."""
-    num_item = nnz_users_per_item.shape[0]
-    num_feature = user_features.shape[0]
+    num_item = train.shape[0]
+    num_feature = user_features.shape[1]
     lambda_I = lambda_item * sp.eye(num_feature)
-    updated_item_features = np.zeros((num_feature, num_item))
+    updated_item_features = np.zeros((num_item, num_feature))
 
     for item, users in nz_item_userindices:
-        # extract the columns corresponding to the prediction for given user
-        M = user_features[:, users]
-        V = M @ train[item, users].T
-        A = M @ M.T + nnz_users_per_item[item] * lambda_I
-        X = np.linalg.solve(A, V)
-        updated_item_features[:, item] = np.copy(X.T)
+        
+        solve_A = user_features[users,:].T.dot(user_features[users,:]) + lambda_I
+        solve_B = user_features[users,:].T * train[item, users].T
+        
+        X = np.linalg.solve(solve_A, solve_B)
+        updated_item_features[item,:] = X.squeeze(axis=1)
     return updated_item_features
 
 
 
-def ALS(train, test):
+def ALS(train, test, num_features):
     """Alternating Least Squares (ALS) algorithm."""
-    # define parameters
-    num_features = 3   # K in the lecture notes
+    # define parameters   
     lambda_user = 0.2
     lambda_item = 0.9
     stop_criterion = 1e-4
@@ -74,7 +72,7 @@ def ALS(train, test):
             train, user_features, lambda_item,
             nnz_users_per_item, nz_item_userindices)
 
-        error = compute_error(train, user_features, item_features, nz_train)
+        error = compute_error(train, user_features.T, item_features, nz_train)
         print("RMSE on training set: {}.".format(error))
         error_list.append(error)
         change = np.fabs(error_list[-1] - error_list[-2])
@@ -83,7 +81,7 @@ def ALS(train, test):
     if test != None:
         nnz_row, nnz_col = test.nonzero()
         nnz_test = list(zip(nnz_row, nnz_col))
-        rmse = compute_error(test, user_features, item_features, nnz_test)
+        rmse = compute_error(test, user_features.T, item_features, nnz_test)
         print("test RMSE after running ALS: {v}.".format(v=rmse))
     
-    return item_features.T.dot(user_features)
+    return item_features.dot(user_features.T)

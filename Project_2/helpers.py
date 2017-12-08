@@ -3,32 +3,30 @@ from itertools import groupby
 import numpy as np
 import scipy.sparse as sp
 import csv
+from sklearn import decomposition
 
 
 def init_MF(train, num_features):
     """init the parameter for matrix factorization."""
         
-    num_item, num_user = train.get_shape()
-
-    user_features = np.random.rand(num_features, num_user)
-    item_features = np.random.rand(num_features, num_item)
-
-    # start by item features.
-    item_nnz = train.getnnz(axis=1)
-    item_sum = train.sum(axis=1)
-
-    for ind in range(num_item):
-        item_features[0, ind] = item_sum[ind, 0] / item_nnz[ind]
-    return user_features, item_features
+    model = decomposition.NMF(n_components=num_features)
+    item_features = model.fit_transform(train)
+    user_features = model.components_
+    return user_features.T, item_features
 
 
 def compute_error(data, user_features, item_features, nz):
     """compute the loss (MSE) of the prediction of nonzero elements."""
-    mse = 0
+    prediction = item_features.dot(user_features)
+    temp_data= []
+    temp_pred = []
     for row, col in nz:
-        item_info = item_features[:, row]
-        user_info = user_features[:, col]
-        mse += (data[row, col] - user_info.T.dot(item_info)) ** 2
+        temp_data.append(data[row,col])
+        temp_pred.append(prediction[row,col])
+    temp_data = np.array(temp_data)
+    temp_pred = np.array(temp_pred)
+    err = temp_data-temp_pred
+    mse = err.dot(err.T)
     return np.sqrt(1.0 * mse / len(nz))
 
 
