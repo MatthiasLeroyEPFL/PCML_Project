@@ -18,6 +18,9 @@ def init_MF(train, num_features):
 def compute_error(data, user_features, item_features, nz):
     """compute the loss (MSE) of the prediction of nonzero elements."""
     prediction = item_features.dot(user_features)
+    return compute_mix_error(data, prediction, nz)
+
+def compute_mix_error(data, prediction, nz):
     temp_data= []
     temp_pred = []
     for row, col in nz:
@@ -89,7 +92,9 @@ def load_data(path_dataset):
     return preprocess_data(data)
 
 
-def preprocess_data(data):
+
+
+def preprocess_data(data, surprise=False):
     """preprocessing the text data, conversion to numerical array format."""
     def deal_line(line):
         pos, rating = line.split(',')
@@ -97,14 +102,15 @@ def preprocess_data(data):
         row = row.replace("r", "")
         col = col.replace("c", "")
         return int(row), int(col), float(rating)
-
+    
     def statistics(data):
         row = set([line[0] for line in data])
         col = set([line[1] for line in data])
         return min(row), max(row), min(col), max(col)
-
-    # parse each line
-    data = [deal_line(line) for line in data]
+    
+    if not surprise:
+        # parse each line
+        data = [deal_line(line) for line in data]
 
     # do statistics on the dataset.
     min_row, max_row, min_col, max_col = statistics(data)
