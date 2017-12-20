@@ -92,16 +92,16 @@ def load_data(path_dataset):
     return preprocess_data(data)
 
 
-
+def deal_line(line):
+    pos, rating = line.split(',')
+    row, col = pos.split("_")
+    row = row.replace("r", "")
+    col = col.replace("c", "")
+    return int(row), int(col), float(rating)
+    
 
 def preprocess_data(data, surprise=False):
     """preprocessing the text data, conversion to numerical array format."""
-    def deal_line(line):
-        pos, rating = line.split(',')
-        row, col = pos.split("_")
-        row = row.replace("r", "")
-        col = col.replace("c", "")
-        return int(row), int(col), float(rating)
     
     def statistics(data):
         row = set([line[0] for line in data])
@@ -156,6 +156,11 @@ def get_row_and_col(line):
     user_id = user_id.replace('r', '')
     movie_id = movie_id.replace('c', '')
     return int(user_id), int(movie_id)
+
+def get_to_predict():
+    f = open('sample_submission.csv', 'r')
+    data = f.read().splitlines()[1:]
+    return list(map(lambda line: deal_line(line), data))
 
 def create_csv_submissions(predict):
     f = open('sample_submission.csv', 'r')

@@ -81,5 +81,6 @@ def ALS(train, test, num_features, lambda_user, lambda_item):
         nnz_test = list(zip(nnz_row, nnz_col))
         rmse = compute_error(test, user_features.T, item_features, nnz_test)
         print("test RMSE after running ALS: {v}.".format(v=rmse))
+        return item_features.dot(user_features.T), rmse
     
     return item_features.dot(user_features.T)

@@ -3,13 +3,8 @@ from helpers import *
 
 
 
-def matrix_factorization_SGD(train, test):
+def matrix_factorization_SGD(train, test, gamma, num_features, lambda_user, lambda_item):
     """matrix factorization by SGD."""
-    # define parameters
-    gamma = 0.01
-    num_features = 20  # K in the lecture notes
-    lambda_user = 0.1
-    lambda_item = 0.016
     num_epochs = 20     # number of full passes through the train set
     errors = [0]
     
