@@ -7,12 +7,14 @@
 The aim of this project is to predict the rates on movies by some users based on others ratings
 ## Structure
 
-- project2_description.pdf: project description
-- report.pdf: final pdf report
-
-### Script Folder
 - helpers.py: set of methods which build the dataset
 - run.py: main program which compute our final submission file
+- sgd.py:  implementation of SGD to predict the ratings
+- als.py: implementation of ALS to predict the ratings
+- models.py: Contain all the others models
+
+### Report Folder
+- report.pdf: final pdf report
 
 
 ## Run
