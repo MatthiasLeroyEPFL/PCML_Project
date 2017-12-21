@@ -21,7 +21,6 @@ def matrix_factorization_SGD(train, test, gamma, num_features, lambda_user, lamb
         nz_row, nz_col = test.nonzero()
         nz_test = list(zip(nz_row, nz_col))
 
-    print("learn the matrix factorization using SGD...")
     for it in range(num_epochs):        
         # shuffle the training rating indices
         np.random.shuffle(nz_train)
@@ -40,12 +39,13 @@ def matrix_factorization_SGD(train, test, gamma, num_features, lambda_user, lamb
             user_features[n, :] += gamma * (err * item_info - lambda_user * user_info)
 
         rmse = compute_error(train, user_features.T, item_features, nz_train)
-        print("iter: {}, RMSE on training set: {}.".format(it, rmse))
         
         errors.append(rmse)
+        print('Progression SGD: {:.2f}%'.format((it+1)/num_epochs*100), end='\r')
 
     # evaluate the test error
     if test != None:
         rmse = compute_error(test, user_features.T, item_features, nz_test)
         print("RMSE on test data: {}.".format(rmse))
+        return item_features.dot(user_features.T), rmse
     return item_features.dot(user_features.T)

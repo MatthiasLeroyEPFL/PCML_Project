@@ -60,7 +60,7 @@ def ALS(train, test, num_features, lambda_user, lambda_item):
     nz_train, nz_item_userindices, nz_user_itemindices = build_index_groups(train)
 
     # run ALS
-    print("\nstart the ALS algorithm...")
+    i = 0
     while change > stop_criterion:
         # update user feature & item feature
         user_features = update_user_feature(
@@ -71,9 +71,10 @@ def ALS(train, test, num_features, lambda_user, lambda_item):
             nnz_users_per_item, nz_item_userindices)
 
         error = compute_error(train, user_features.T, item_features, nz_train)
-        print("RMSE on training set: {}.".format(error))
         error_list.append(error)
         change = np.fabs(error_list[-1] - error_list[-2])
+        i += 1
+        print('number of iterations: ',i)
 
     # evaluate the test error
     if test != None:

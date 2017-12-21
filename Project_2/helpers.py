@@ -6,20 +6,21 @@ import csv
 from sklearn import decomposition
 
 
+"""init the parameter for matrix factorization."""
 def init_MF(train, num_features):
-    """init the parameter for matrix factorization."""
-        
+    
     model = decomposition.NMF(n_components=num_features)
     item_features = model.fit_transform(train)
     user_features = model.components_
     return user_features.T, item_features
 
-
+"""compute the loss (MSE) of the prediction of nonzero elements."""
 def compute_error(data, user_features, item_features, nz):
-    """compute the loss (MSE) of the prediction of nonzero elements."""
+   
     prediction = item_features.dot(user_features)
     return compute_mix_error(data, prediction, nz)
 
+"""compute the loss (MSE) of the prediction of nonzero elements."""
 def compute_mix_error(data, prediction, nz):
     temp_data= []
     temp_pred = []
@@ -79,15 +80,15 @@ def split_data(ratings, num_items_per_user, num_users_per_item,
     return valid_ratings, train, test
 
 
-
+"""read text file from path."""
 def read_txt(path):
-    """read text file from path."""
+    
     with open(path, "r") as f:
         return f.read().splitlines()
 
-
+"""Load data in text format, one rating per line, as in the kaggle competition."""
 def load_data(path_dataset):
-    """Load data in text format, one rating per line, as in the kaggle competition."""
+    
     data = read_txt(path_dataset)[1:]
     return preprocess_data(data)
 
@@ -99,9 +100,9 @@ def deal_line(line):
     col = col.replace("c", "")
     return int(row), int(col), float(rating)
     
-
+"""preprocessing the text data, conversion to numerical array format."""
 def preprocess_data(data, surprise=False):
-    """preprocessing the text data, conversion to numerical array format."""
+    
     
     def statistics(data):
         row = set([line[0] for line in data])
@@ -114,7 +115,6 @@ def preprocess_data(data, surprise=False):
 
     # do statistics on the dataset.
     min_row, max_row, min_col, max_col = statistics(data)
-    print("number of items: {}, number of users: {}".format(max_row, max_col))
 
     # build rating matrix.
     ratings = sp.lil_matrix((max_row, max_col))
@@ -122,16 +122,16 @@ def preprocess_data(data, surprise=False):
         ratings[row - 1, col - 1] = rating
     return ratings
 
-
+"""group list of list by a specific index."""
 def group_by(data, index):
-    """group list of list by a specific index."""
+    
     sorted_data = sorted(data, key=lambda x: x[index])
     groupby_data = groupby(sorted_data, lambda x: x[index])
     return groupby_data
 
-
+"""build groups for nnz rows and cols."""
 def build_index_groups(train):
-    """build groups for nnz rows and cols."""
+    
     nz_row, nz_col = train.nonzero()
     nz_train = list(zip(nz_row, nz_col))
 
@@ -145,11 +145,13 @@ def build_index_groups(train):
     return nz_train, nz_row_colindices, nz_col_rowindices
 
 
+"""calculate MSE."""
 def calculate_mse(real_label, prediction):
-    """calculate MSE."""
+    
     t = real_label - prediction
     return 1.0 * t.dot(t.T)
 
+"""Get row and column of rating"""
 def get_row_and_col(line):
     ids, rating = line.split(',')
     user_id, movie_id = ids.split('_')
@@ -157,12 +159,14 @@ def get_row_and_col(line):
     movie_id = movie_id.replace('c', '')
     return int(user_id), int(movie_id)
 
+"""Get the ratings to predict for Surprise"""
 def get_to_predict():
     f = open('sample_submission.csv', 'r')
     data = f.read().splitlines()[1:]
     return list(map(lambda line: deal_line(line), data))
 
-def create_csv_submissions(predict):
+"""Create submission file"""
+def create_submissions(predict):
     f = open('sample_submission.csv', 'r')
     data = f.read().splitlines()[1:]
     to_predict = [(get_row_and_col(line)[0], get_row_and_col(line)[1]) for line in data]

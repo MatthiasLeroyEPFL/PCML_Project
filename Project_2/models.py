@@ -6,8 +6,9 @@ from surprise import *
 import surprise
 
 
+"""baseline method: use the user means as the prediction."""
 def baseline_user_mean(train, test):
-    """baseline method: use the user means as the prediction."""
+    
     mse = 0
     num_items, num_users = train.shape
     means = []
@@ -36,8 +37,9 @@ def baseline_user_mean(train, test):
         print("test RMSE of the baseline using the user mean: {v}.".format(v=rmse))
     return means
 
+"""baseline method: use the global mean."""
 def baseline_global_mean(train, test):
-    """baseline method: use the global mean."""
+    
     # find the non zero ratings in the train
     nonzero_train = train[train.nonzero()]
 
@@ -54,9 +56,9 @@ def baseline_global_mean(train, test):
         print("test RMSE of baseline using the global mean: {v}.".format(v=rmse))
     return global_mean_train
     
-    
+"""baseline method: use item means as the prediction."""    
 def baseline_item_mean(train, test):
-    """baseline method: use item means as the prediction."""
+    
     mse = 0
     num_items, num_users = train.shape
     
@@ -87,7 +89,7 @@ def baseline_item_mean(train, test):
         print("test RMSE of the baseline using the item mean: {v}.".format(v=rmse))
     return means
 
-    
+"""Format the data to use with Surprise"""    
 def create_data(dataset):
     dataset_matrix = pd.DataFrame(dataset.todense())
     dataset_df = pd.DataFrame(dataset_matrix.unstack())
@@ -97,15 +99,16 @@ def create_data(dataset):
     dataset_df['row'] +=1
     return dataset_df[dataset_df['rate'] != 0]    
     
-    
-def svd_surprise(train, test, target):
+
+"""Predictions using SVD algorithm of Surprise"""    
+def svd_surprise(train, test, target, factors=20):
     
     train_df = create_data(train)
     reader = surprise.dataset.Reader(rating_scale=(1,5))
     data = Dataset.load_from_df(train_df[['row', 'col', 'rate']], reader)
     data.split(2) 
     
-    algo = SVD(n_factors=20)
+    algo = SVD(n_factors=factors)
     algo.train(data.build_full_trainset())
     
     test_df = train_df.copy()
@@ -126,11 +129,13 @@ def svd_surprise(train, test, target):
     if test != None:
         nnz_row, nnz_col = test.nonzero()
         nnz_test = list(zip(nnz_row, nnz_col))
-        print(compute_mix_error(data=test, prediction=pred_df.as_matrix(), nz=nnz_test))
+        rmse = compute_mix_error(data=test, prediction=pred_df.as_matrix(), nz=nnz_test)
+        print(rmse)
+        return pred_df.as_matrix(), rmse
     return pred_df.as_matrix()
 
 
-
+"""Predictions using KNN algorithm of Surprise"""  
 def knn_surprise(train, test, target, user_based=True, k=100):
     
     train_df = create_data(train)
@@ -144,22 +149,18 @@ def knn_surprise(train, test, target, user_based=True, k=100):
     
     algo = KNNBaseline(k=k,sim_options=sim_options)
     algo.train(data.build_full_trainset())
-    print('train')
     
     test_df = train_df.copy()
     temp = []
     if test != None:
         test_df = create_data(test)
-        print('err')
         for index, row in test_df.iterrows():
             temp.append((int (row['row']), int (row['col']), row['rate']))
     if target == None:
         predictions = algo.test(temp)
     else:
-        print('yes')
         predictions = algo.test(target)
     final_predictions = []
-    print('wtf')
     for pred in predictions:
         final_predictions.append((pred[0], pred[1], pred[3]))
     pred_df = pd.DataFrame(preprocess_data(final_predictions, True).todense())
@@ -171,6 +172,8 @@ def knn_surprise(train, test, target, user_based=True, k=100):
         return pred_df.as_matrix(), rmse
     return pred_df.as_matrix()
 
+
+"""Predictions using baseline algorithm of Surprise"""  
 def baseline_surprise(train, test, target):
     
     train_df = create_data(train)
@@ -202,7 +205,9 @@ def baseline_surprise(train, test, target):
         print(compute_mix_error(data=test, prediction=pred_df.as_matrix(), nz=nnz_test))
     return pred_df.as_matrix()
 
-def slop_surprise(train, test, target):
+
+"""Predictions using slope one algorithm of Surprise"""  
+def slope_surprise(train, test, target):
     
     train_df = create_data(train)
     reader = surprise.dataset.Reader(rating_scale=(1,5))
