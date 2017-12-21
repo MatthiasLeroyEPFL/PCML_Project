@@ -4,11 +4,11 @@
 
 *Implemented by Pierre Fouche, Matthias Leroy and Alexandre Poussard.*
 
-The aim of this project is to predict the rates on movies by some users based on others ratings
+The aim of this project is to predict the rates on movies by some users based on others ratings.
 ## Structure
 
 - helpers.py: set of methods which build the dataset
-- run.py: main program which compute our final submission file
+- run.py: main program which computes our final submission file
 - sgd.py:  implementation of SGD to predict the ratings
 - als.py: implementation of ALS to predict the ratings
 - models.py: Contain all the others models
@@ -20,10 +20,14 @@ The aim of this project is to predict the rates on movies by some users based on
 ## Run
 In order to run this project, start by cloning this repository.
 
-You  have to install the python libraries Surprise. If you are on Windows, you need first a C++ compiler installed.
+Then you have to install Numpy, Scikit-learn, Scipy, Pandas and Surprise.  
+If you are on Windows, you need first a C++ compiler installed to get Surprise.
 Then run in a terminal the following:
 ```python
 [sudo] pip install numpy
+[sudo] pip install -U scikit-learn
+[sudo] pip install scipy
+[sudo] pip install panda
 [sudo] pip install scipy-surprise
 ```
 
@@ -36,5 +40,6 @@ python run.py
 ```
 (Assuming you are running python3 as default, otherwise, run "python3.5 run.py" instead)
 
+The program needs 25 minutes more or less to finish.  
 This will generate a file called "submission.csv" in the current folder.
 
