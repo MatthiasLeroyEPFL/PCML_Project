@@ -4,11 +4,11 @@
 
 *Implemented by Pierre Fouche, Matthias Leroy and Alexandre Poussard.*
 
-The aim of this project is to predict the rates on movies by some users based on others ratings
+The aim of this project is to predict the rates on movies by some users based on others ratings.
 ## Structure
 
 - helpers.py: set of methods which build the dataset
-- run.py: main program which compute our final submission file
+- run.py: main program which computes our final submission file
 - sgd.py:  implementation of SGD to predict the ratings
 - als.py: implementation of ALS to predict the ratings
 - models.py: Contain all the others models
@@ -36,6 +36,6 @@ python run.py
 ```
 (Assuming you are running python3 as default, otherwise, run "python3.5 run.py" instead)
 
-The program needs 25 minutes more or less to finish.
+The program needs 25 minutes more or less to finish.  
 This will generate a file called "submission.csv" in the current folder.
 
