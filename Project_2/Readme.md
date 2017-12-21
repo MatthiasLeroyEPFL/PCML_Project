@@ -36,5 +36,6 @@ python run.py
 ```
 (Assuming you are running python3 as default, otherwise, run "python3.5 run.py" instead)
 
+The program needs 25 minutes more or less to finish.
 This will generate a file called "submission.csv" in the current folder.
 
