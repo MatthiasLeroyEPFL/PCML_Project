@@ -42,6 +42,7 @@ def matrix_factorization_SGD(train, test, gamma, num_features, lambda_user, lamb
         
         errors.append(rmse)
         print('Progression SGD: {:.2f}%'.format((it+1)/num_epochs*100), end='\r')
+    print('\n')
 
     # evaluate the test error
     if test != None:

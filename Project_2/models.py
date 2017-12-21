@@ -97,26 +97,17 @@ def create_data(dataset):
     dataset_df.rename(columns={'level_0': 'col', 'level_1': 'row', 0: 'rate'}, inplace=True)
     dataset_df['col'] +=1
     dataset_df['row'] +=1
-    return dataset_df[dataset_df['rate'] != 0]    
-    
+    return dataset_df[dataset_df['rate'] != 0]
 
-"""Predictions using SVD algorithm of Surprise"""    
-def svd_surprise(train, test, target, factors=20):
-    
-    train_df = create_data(train)
-    reader = surprise.dataset.Reader(rating_scale=(1,5))
-    data = Dataset.load_from_df(train_df[['row', 'col', 'rate']], reader)
-    data.split(2) 
-    
-    algo = SVD(n_factors=factors)
-    algo.train(data.build_full_trainset())
-    
-    test_df = train_df.copy()
+
+"""Create predictions from the surprise algorithm"""
+def get_prediction_surprise(algo, train, test, target):
+    test_df = train.copy()
     temp = []
     if test != None:
         test_df = create_data(test)
-    for index, row in test_df.iterrows():
-        temp.append((int (row['row']), int (row['col']), row['rate']))
+        for index, row in test_df.iterrows():
+            temp.append((int (row['row']), int (row['col']), row['rate']))
     if target == None:
         predictions = algo.test(temp)
     else:
@@ -133,6 +124,20 @@ def svd_surprise(train, test, target, factors=20):
         print(rmse)
         return pred_df.as_matrix(), rmse
     return pred_df.as_matrix()
+    
+
+"""Predictions using SVD algorithm of Surprise"""    
+def svd_surprise(train, test, target, factors=20):
+    
+    train_df = create_data(train)
+    reader = surprise.dataset.Reader(rating_scale=(1,5))
+    data = Dataset.load_from_df(train_df[['row', 'col', 'rate']], reader)
+    data.split(2) 
+    
+    algo = SVD(n_factors=factors)
+    algo.train(data.build_full_trainset())
+    
+    return get_prediction_surprise(algo, train_df, test, target)
 
 
 """Predictions using KNN algorithm of Surprise"""  
@@ -150,27 +155,7 @@ def knn_surprise(train, test, target, user_based=True, k=100):
     algo = KNNBaseline(k=k,sim_options=sim_options)
     algo.train(data.build_full_trainset())
     
-    test_df = train_df.copy()
-    temp = []
-    if test != None:
-        test_df = create_data(test)
-        for index, row in test_df.iterrows():
-            temp.append((int (row['row']), int (row['col']), row['rate']))
-    if target == None:
-        predictions = algo.test(temp)
-    else:
-        predictions = algo.test(target)
-    final_predictions = []
-    for pred in predictions:
-        final_predictions.append((pred[0], pred[1], pred[3]))
-    pred_df = pd.DataFrame(preprocess_data(final_predictions, True).todense())
-    if test != None:
-        nnz_row, nnz_col = test.nonzero()
-        nnz_test = list(zip(nnz_row, nnz_col))
-        rmse = compute_mix_error(data=test, prediction=pred_df.as_matrix(), nz=nnz_test)
-        print(rmse)
-        return pred_df.as_matrix(), rmse
-    return pred_df.as_matrix()
+    return get_prediction_surprise(algo, train_df, test, target)
 
 
 """Predictions using baseline algorithm of Surprise"""  
@@ -185,26 +170,7 @@ def baseline_surprise(train, test, target):
     algo = BaselineOnly()
     algo.train(data.build_full_trainset())
     
-    test_df = train_df.copy()
-    temp = []
-    if test != None:
-        test_df = create_data(test)
-        for index, row in test_df.iterrows():
-            temp.append((int (row['row']), int (row['col']), row['rate']))
-    if target == None:
-        predictions = algo.test(temp)
-    else:
-        predictions = algo.test(target)
-    final_predictions = []
-    for pred in predictions:
-        final_predictions.append((pred[0], pred[1], pred[3]))
-    pred_df = pd.DataFrame(preprocess_data(final_predictions, True).todense())
-    if test != None:
-        nnz_row, nnz_col = test.nonzero()
-        nnz_test = list(zip(nnz_row, nnz_col))
-        print(compute_mix_error(data=test, prediction=pred_df.as_matrix(), nz=nnz_test))
-    return pred_df.as_matrix()
-
+    return get_prediction_surprise(algo, train_df, test, target)
 
 """Predictions using slope one algorithm of Surprise"""  
 def slope_surprise(train, test, target):
@@ -218,22 +184,4 @@ def slope_surprise(train, test, target):
     algo = SlopeOne()
     algo.train(data.build_full_trainset())
     
-    test_df = train_df.copy()
-    temp = []
-    if test != None:
-        test_df = create_data(test)
-        for index, row in test_df.iterrows():
-            temp.append((int (row['row']), int (row['col']), row['rate']))
-    if target == None:
-        predictions = algo.test(temp)
-    else:
-        predictions = algo.test(target)
-    final_predictions = []
-    for pred in predictions:
-        final_predictions.append((pred[0], pred[1], pred[3]))
-    pred_df = pd.DataFrame(preprocess_data(final_predictions, True).todense())
-    if test != None:
-        nnz_row, nnz_col = test.nonzero()
-        nnz_test = list(zip(nnz_row, nnz_col))
-        print(compute_mix_error(data=test, prediction=pred_df.as_matrix(), nz=nnz_test))
-    return pred_df.as_matrix()
+    return get_prediction_surprise(algo, train_df, test, target)

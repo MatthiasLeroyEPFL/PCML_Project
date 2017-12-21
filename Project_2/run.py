@@ -3,9 +3,7 @@ from sgd import *
 from als import *
 from models import *
 import numpy as np
-import time
 
-start = time.time()
 
 print('Loading the data...')
 ratings = load_data('data_train.csv')
@@ -52,8 +50,8 @@ predict_slope = slope_surprise(ratings, None, to_predict)
 all_predictions.append(predict_slope)
 
 print('Mixing the models...')
-weights = [ 0.65520667,  0.1487928 ,  0.04672615,  0.04749113,  0.08724932,
-       -0.06340962,  0.40376256, -0.30433552, -0.01218448]
+weights = [ 0.6606293 ,  0.155485  ,  0.04616225,  0.04531555,  0.08127007,
+       -0.06675145,  0.40258731, -0.28565113, -0.02940758]
 
 #Sum the weighted models
 final_predict = 0
@@ -67,6 +65,4 @@ final_predict[final_predict>5] = 5
 print('Creating csv file...')
 create_submissions(final_predict)
 
-end = time.time()
-print(end-start)
 
