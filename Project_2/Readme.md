@@ -20,10 +20,14 @@ The aim of this project is to predict the rates on movies by some users based on
 ## Run
 In order to run this project, start by cloning this repository.
 
-You  have to install the python libraries Surprise. If you are on Windows, you need first a C++ compiler installed.
+Then you have to install Numpy, Scikit-learn, Scipy, Pandas and Surprise.  
+If you are on Windows, you need first a C++ compiler installed to get Surprise.
 Then run in a terminal the following:
 ```python
 [sudo] pip install numpy
+[sudo] pip install -U scikit-learn
+[sudo] pip install scipy
+[sudo] pip install panda
 [sudo] pip install scipy-surprise
 ```
 
